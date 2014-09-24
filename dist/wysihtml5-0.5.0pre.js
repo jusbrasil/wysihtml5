@@ -9143,6 +9143,11 @@ wysihtml5.views.View = Base.extend(
                 parseElement(blockElement, keyCode);
              }
 
+             if(!browser.hasIframeFocusIssue() && browser.detectsReturnKeydownAfterItIsDone()){//Firefox case
+                blockElement = blockElement.previousSibling || blockElement;
+                parseElement(blockElement, keyCode);
+             }
+
             if (keyCode === wysihtml5.ENTER_KEY && blockElement.nodeName.match(/^H[1-6]$/)) {
               adjust(selectedNode);
             }
