@@ -4961,7 +4961,6 @@ wysihtml5.dom.parse = (function() {
       element = elementOrHtml;
     }
 
-
     if(typeof rules === "object" && rules.root_text_nodes && (element.nodeName == "BODY" || element.nodeName == "BLOCKQUOTE" || !element.parentNode)) {
       var _handleRootTextNodes = function(firstChild){
         if(INLINE_TEXT_NODENAMES.indexOf(firstChild.nodeName) >= 0){
@@ -6549,6 +6548,9 @@ wysihtml5.quirks.ensureProperClearing = (function() {
           newRange.setEndBefore(newCaretPlaceholder);
         } else {
           newRange.selectNode(caretPlaceholder);
+          if (caretPlaceholder.textContent !== '') {
+            caretPlaceholder.outerHTML = caretPlaceholder.innerHTML;
+          }
           newRange.deleteContents();
         }
         this.setSelection(newRange);
@@ -7857,7 +7859,8 @@ wysihtml5.commands.bold = {
       return _getApplier(tagName, className, classRegExp).isAppliedToRange(range);
     }
   };
-})(wysihtml5);wysihtml5.commands.insertHTML = {
+})(wysihtml5);
+wysihtml5.commands.insertHTML = {
   exec: function(composer, command, html) {
     if (composer.commands.support(command)) {
       composer.doc.execCommand(command, false, html);
@@ -9084,7 +9087,7 @@ wysihtml5.views.View = Base.extend(
 
       // Remove the br from paragraph when space key is pressed
       // Firefox always inserts the br on space
-      if (browser.detectsReturnKeydownAfterItIsDone) {
+      if (browser.detectsReturnKeydownAfterItIsDone()) {
         dom.observe(this.doc, "keyup", function(event) {
           var keyCode = event.keyCode,
               _el = that.selection.getSelectedNode();
@@ -9100,8 +9103,16 @@ wysihtml5.views.View = Base.extend(
         });
       }
 
+      var lastKey;
       dom.observe(this.doc, "keydown", function(event) {
         var keyCode = event.keyCode;
+
+        // Prevent double sequential spaces
+        if (keyCode === wysihtml5.SPACE_KEY && keyCode === lastKey) {
+          event.preventDefault();
+          return;
+        }
+        lastKey = keyCode;
 
         // [firefox fallback]
         if (browser.detectsReturnKeydownAfterItIsDone()) {
@@ -9152,7 +9163,7 @@ wysihtml5.views.View = Base.extend(
                 that.repositionCaretAt(repl);
 
                 // Remove empty paragraph after the created HR [firefox fallback]
-                if (browser.detectsReturnKeydownAfterItIsDone) {
+                if (browser.detectsReturnKeydownAfterItIsDone()) {
                   removeEmptySiblingParagraphFallback(repl, 'previous');
                 }
               }
@@ -9214,6 +9225,7 @@ wysihtml5.views.View = Base.extend(
             event.preventDefault();
             that.repositionCaretAt(that.insertNodes(blockElement, [ that.makeEmptyParagraph()]));
           }
+
           // firefox fallback
           if(browser.detectsReturnKeydownAfterItIsDone()) {
             var TAGS_COULD_BE_REMOVE = ['HR', 'IFRAME'];
@@ -9234,7 +9246,7 @@ wysihtml5.views.View = Base.extend(
             // Force remove elements on backspace
             else if (event.keyCode === wysihtml5.BACKSPACE_KEY) {
               var _prev = blockElement.previousElementSibling,
-                  _prevNodes = (_prev) ? _prev.previousElementSibling.childNodes: [],
+                  _prevNodes = (_prev && _prev.previousElementSibling) ? _prev.previousElementSibling.childNodes: [],
                   arrayContains = rangy.dom.arrayContains;
               // Remove HL from sibling
               if (blockElement
@@ -9308,7 +9320,7 @@ wysihtml5.views.View = Base.extend(
           return;
         } else {
           // [firefox fallback]
-          if (browser.detectsReturnKeydownAfterItIsDone && keyCode !== wysihtml5.BACKSPACE_KEY) {
+          if (browser.detectsReturnKeydownAfterItIsDone() && keyCode !== wysihtml5.BACKSPACE_KEY) {
             var _body = that.selection.getSelectedNode();
             _body.innerHTML = wysihtml5.dom.parse(_body, that.config.parserRules).innerHTML;
             // create a paragraph on breaked cursor
@@ -9828,12 +9840,33 @@ wysihtml5.views.View = Base.extend(
       that.parent.fire("unset_placeholder");
     });
 
+
+
     if(typeof that.config.filterOnPaste === "function"){
       that.filterOnPaste = function(e){
         if(e.clipboardData){
           e.preventDefault();
           var txt = e.clipboardData.getData('text/html') || e.clipboardData.getData('text');
           txt = that.config.filterOnPaste(txt);
+
+          // Firefox avoids pasting clipboardData in text/html type
+          // This method replace break line by paragraph
+          // [firefox fallback]
+          if (wysihtml5.browser.detectsReturnKeydownAfterItIsDone() && !e.clipboardData.types.contains('text/html')) {
+            txt = txt.replace(/\n+|\r+/g, '<br><br>');
+          }
+
+          // Break sequential breaklines in paragraphs
+          // and sanitize them
+          // (two or more <br>)
+          //
+          // Example:
+          // In: <p>Text<br><br>Text2</p>
+          // Out: <p>Text></p><p>Text2</p>
+          txt = txt
+            .replace(/p>(&nbsp;| )/g, 'p>')
+            .replace(/(&nbsp;| )<p/g, '<p')
+            .replace(/[&nbsp;$| $]*(<br[^>]*>)(<br[^>]*>)+/g, '</p><p>');
 
           that.commands.exec('insertHTML', txt);
         }
@@ -9845,6 +9878,7 @@ wysihtml5.views.View = Base.extend(
 
     dom.observe(element, pasteEvents, function(e) {
       that.filterOnPaste(e);
+
       setTimeout(function() {
         that.parent.fire("paste").fire("paste:composer");
       }, 0);
@@ -10144,7 +10178,7 @@ wysihtml5.views.View = Base.extend(
           // Force disable the sync feature. If enabled, firefox submit the unparsed content,
           // because the synchronizer gets the old data [firefox fallback]
           // Weird >>> This method is disabled to Chrome default
-          if (!wysihtml5.browser.detectsReturnKeydownAfterItIsDone) {
+          if (!wysihtml5.browser.detectsReturnKeydownAfterItIsDone()) {
             that.sync(true);
           }
         });
