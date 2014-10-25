@@ -4961,6 +4961,9 @@ wysihtml5.dom.parse = (function() {
       element = elementOrHtml;
     }
 
+    // cleanUp element, removing all &nbsp extras
+    element.innerHTML = element.innerHTML.replace(/&nbsp;|  +|&nbsp;&nbsp;+| &nbsp;+|&nbsp; +/g, ' ');
+
     if(typeof rules === "object" && rules.root_text_nodes && (element.nodeName == "BODY" || element.nodeName == "BLOCKQUOTE" || !element.parentNode)) {
       var _handleRootTextNodes = function(firstChild){
         if(INLINE_TEXT_NODENAMES.indexOf(firstChild.nodeName) >= 0){
