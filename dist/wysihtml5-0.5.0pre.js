@@ -4961,9 +4961,6 @@ wysihtml5.dom.parse = (function() {
       element = elementOrHtml;
     }
 
-    // cleanUp element, removing all &nbsp extras
-    element.innerHTML = element.innerHTML.replace(/&nbsp;|  +|&nbsp;&nbsp;+| &nbsp;+|&nbsp; +/g, ' ');
-
     if(typeof rules === "object" && rules.root_text_nodes && (element.nodeName == "BODY" || element.nodeName == "BLOCKQUOTE" || !element.parentNode)) {
       var _handleRootTextNodes = function(firstChild){
         if(INLINE_TEXT_NODENAMES.indexOf(firstChild.nodeName) >= 0){
@@ -9106,16 +9103,8 @@ wysihtml5.views.View = Base.extend(
         });
       }
 
-      var lastKey;
       dom.observe(this.doc, "keydown", function(event) {
         var keyCode = event.keyCode;
-
-        // Prevent double sequential spaces
-        if (keyCode === wysihtml5.SPACE_KEY && keyCode === lastKey) {
-          event.preventDefault();
-          return;
-        }
-        lastKey = keyCode;
 
         // [firefox fallback]
         if (browser.detectsReturnKeydownAfterItIsDone()) {
@@ -9861,7 +9850,7 @@ wysihtml5.views.View = Base.extend(
 
           // Break sequential breaklines in paragraphs
           // and sanitize them
-          // (two or more <br>)
+          // (merge two or more <br> as one)
           //
           // Example:
           // In: <p>Text<br><br>Text2</p>
