@@ -6549,7 +6549,7 @@ wysihtml5.quirks.ensureProperClearing = (function() {
         } else {
           newRange.selectNode(caretPlaceholder);
           if (caretPlaceholder.textContent !== '') {
-            caretPlaceholder.outerHTML = caretPlaceholder.innerHTML;
+            caretPlaceholder.outerHTML = dom.parse(caretPlaceholder, this.composer.config.parserRules).innerHTML;
           }
           newRange.deleteContents();
         }
