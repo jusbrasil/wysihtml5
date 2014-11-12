@@ -6246,6 +6246,14 @@ wysihtml5.dom.selectorParser.parse = (function(){
 wysihtml5.quirks.cleanPastedHTML = (function() {
   // TODO: We probably need more rules here
   var defaultRules = {
+    "a": function(node) {
+      /**
+       * Removes empty anchors (without href attribute)
+      **/
+      if (!node.href || node.href === '') {
+        node.outerHTML = node.innerHTML;
+      }
+    },
     // When pasting underlined links <a> into a contentEditable, IE thinks, it has to insert <u> to keep the styling
     "a u": wysihtml5.dom.replaceWithChildNodes
   };
@@ -6547,10 +6555,11 @@ wysihtml5.quirks.ensureProperClearing = (function() {
           newRange.setStartBefore(newCaretPlaceholder);
           newRange.setEndBefore(newCaretPlaceholder);
         } else {
-          newRange.selectNode(caretPlaceholder);
-          if (caretPlaceholder.textContent !== '') {
+          var caretPlaceholderContent = caretPlaceholder.textContent;
+          if (caretPlaceholderContent !== '' && caretPlaceholderContent !== wysihtml5.INVISIBLE_SPACE) {
             caretPlaceholder.outerHTML = dom.parse(caretPlaceholder, this.composer.config.parserRules).innerHTML;
           }
+          newRange.selectNode(caretPlaceholder);
           newRange.deleteContents();
         }
         this.setSelection(newRange);
