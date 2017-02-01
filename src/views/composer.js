@@ -543,28 +543,6 @@
         }
       }
 
-      // Checks if it should open or not a new paragraph when key enter is hit
-      var shouldOpenNewParagraph = (function(){
-          var ENTER_KEY = wysihtml5.ENTER_KEY;
-
-          return function (currentNode, keyCode){
-
-            if(keyCode !== ENTER_KEY)
-              return true;
-
-            var nextNode = currentNode.nextSibling,
-                prevNode = currentNode.previousSibling;
-
-            if ((currentNode.nodeName === "P" && that.nodeIsEmpty(currentNode))
-              || (nextNode && that.nodeIsEmpty(nextNode) && nextNode.nodeName == "P")
-              || (prevNode && that.nodeIsEmpty(prevNode) && prevNode.nodeName == "P")){
-              return false;
-            }
-
-            return true;
-          }
-      })();
-
       if (!this.config.useLineBreaks) {
         dom.observe(this.element, ["focus", "keydown"], function() {
           if (that.isEmpty()) {
@@ -646,80 +624,7 @@
 
         var blockElement = dom.getParentElement(that.selection.getSelectedNode(), { nodeName: USE_NATIVE_LINE_BREAK_INSIDE_TAGS }, 4);
         if (blockElement) {
-
-          if(!shouldOpenNewParagraph(blockElement, keyCode)){
-            event.preventDefault();
-
-            var hrCandidate = shouldPutHR(blockElement);
-            if(hrCandidate){
-
-              var hr = that.doc.createElement('hr');
-
-              var repl = that.replaceNodeWith(hrCandidate,[hr]);
-              if(repl && !repl.nextElementSibling){
-                repl = that.insertNodes(repl,[ that.makeEmptyParagraph()]);
-                that.repositionCaretAt(repl);
-
-                // Remove empty paragraph after the created HR [firefox fallback]
-                if (browser.detectsReturnKeydownAfterItIsDone()) {
-                  removeEmptySiblingParagraphFallback(repl, 'previous');
-                }
-              }
-
-              return;
-            } else if(blockElement.parentNode && blockElement.parentNode.nodeName == "BLOCKQUOTE") {
-              var frag = that.doc.createDocumentFragment(),
-              prev = blockElement.previousSibling;
-
-              if(prev && !that.nodeIsEmpty(prev)){
-                var prev_quote = that.doc.createElement('blockquote');
-                prev_quote.appendChild(prev.cloneNode(true));
-                prev = prev.previousSibling;
-                while(prev){
-                  prev_quote.insertBefore(prev.cloneNode(true), prev_quote.firstChild);
-                  prev = prev.previousSibling;
-                }
-
-                frag.appendChild(prev_quote);
-              } else {
-
-                return;
-              }
-
-              var next = blockElement.nextSibling;
-              if(next && !that.nodeIsEmpty(next)){
-                var next_quote = that.doc.createElement('blockquote');
-                while(next){
-                  next_quote.appendChild(next.cloneNode(true));
-                  next = next.nextSibling;
-                }
-
-                frag.appendChild(next_quote);
-              } else {
-
-                var blockquote = blockElement.parentNode;
-                blockquote.parentNode.insertBefore(blockElement, blockquote.nextSibling);
-                that.repositionCaretAt(blockElement);
-                return;
-              }
-
-              if(frag.firstChild){
-                var p;
-                if(frag.childNodes.length > 1){
-                  p = that.makeEmptyParagraph();
-                  frag.insertBefore(p, frag.lastChild);
-                }
-
-                that.replaceNodeWith(blockElement.parentNode, [frag]);
-
-                if(p){
-                  that.repositionCaretAt(p);
-                }
-              }
-
-            }
-          }
-          else if(event.shiftKey && event.keyCode == wysihtml5.ENTER_KEY) {
+          if(event.shiftKey && event.keyCode == wysihtml5.ENTER_KEY) {
             event.preventDefault();
             that.repositionCaretAt(that.insertNodes(blockElement, [ that.makeEmptyParagraph()]));
           }
