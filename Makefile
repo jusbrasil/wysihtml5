@@ -1,6 +1,6 @@
 VERSION = $(shell cat version.txt)
 
-JS_OUTPUT = "dist/wysihtml5-${VERSION}.js"
+JS_OUTPUT = "dist/wysihtml5.js"
 
 OPEN = $(shell which xdg-open || which gnome-open || which open)
 
@@ -84,9 +84,8 @@ bundle:
 	@@echo "Bundling..."
 	@@touch ${JS_OUTPUT}
 	@@rm ${JS_OUTPUT}
-	@@cat ${JS_FILES} >> ${JS_OUTPUT}
-	@@cat ${JS_OUTPUT} | sed "s/@VERSION/${VERSION}/" > "${JS_OUTPUT}.tmp"
-	@@mv "${JS_OUTPUT}.tmp" ${JS_OUTPUT}
+	@@printf "`sed 's, *// MODULE,%s,' src/umd.js`\n" "`cat ${JS_FILES}`" |\
+		sed "s/@VERSION/${VERSION}/" > ${JS_OUTPUT}
 
 minify:
 	@@echo "Minifying... (this requires node.js and grunt)"

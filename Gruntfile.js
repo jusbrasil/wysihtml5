@@ -8,8 +8,8 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd h:MM:ss") %> */\n'
       },
       build: {
-        src: 'dist/<%= pkg.name %>-<%= pkg.version %>.js',
-        dest: 'dist/<%= pkg.name %>-<%= pkg.version %>.min.js'
+        src: 'dist/<%= pkg.name %>.js',
+        dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
     qunit: {
@@ -25,8 +25,8 @@ module.exports = function(grunt) {
     },
     min : {
       dist:{
-	src:['dist/<%= pkg.name %>-<%= pkg.version %>.js'],
-	dest:'dist/<%= pkg.name %>-<%= pkg.version %>.min.js'
+	src:['dist/<%= pkg.name %>.js'],
+	dest:'dist/<%= pkg.name %>.min.js'
       }
     }
   });
@@ -36,7 +36,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-yui-compressor');
   grunt.loadNpmTasks('grunt-shell');
-  
+
   grunt.registerTask('test', ['qunit']);
   grunt.registerTask('uglify', ['uglify']);
   grunt.registerTask('bundle', ['shell:make']);
