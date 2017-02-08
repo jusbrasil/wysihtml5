@@ -4,7 +4,7 @@
       // when the caret is within a H1 and the H4 is invoked, the H1 should turn into H4
       // instead of creating a H4 within a H1 which would result in semantically invalid html
       BLOCK_ELEMENTS_GROUP    = ["H1", "H2", "H3", "H4", "H5", "H6", "P", "BLOCKQUOTE", "DIV"];
-  
+
   /**
    * Remove similiar classes (based on classRegExp)
    * and add the desired class name
@@ -176,7 +176,7 @@
           selectedNode;
 
       nodeName = typeof(nodeName) === "string" ? nodeName.toUpperCase() : nodeName;
-      
+
       if (blockElement) {
         composer.selection.executeAndRestoreSimple(function() {
           if (classRegExp) {
@@ -228,7 +228,7 @@
 
             if(!selection || selection.rangeCount <= 0){
               return;
-            }            
+            }
 
             try {
               var range = selection.getRangeAt(0);
@@ -239,7 +239,7 @@
             if(range.startContainer.nodeName == "BODY" || range.endContainer.nodeName == "BODY"){
                 return;
             }
-             
+
             var targetNode;
             //This is a very, very very ugly thing. I'm sorry I've done it that way, but I had a schedule to accomplish
             if(selectedNode.nodeType == selectedNode.TEXT_NODE && selectedNode.parentNode && selectedNode.parentNode.nodeName === "BODY"){
@@ -258,9 +258,9 @@
               range.setStartBefore(start);
               range.setEndAfter(end);
             }
-          
+
             var selectionDom = dom.getAsDom(range.toHtml());
-            
+
             (function remExtraQuotes(elems){//Removes pre-existent blockquotes and replaces them by its contents
               if(elems && elems.length > 0){
                 dom.replaceWithChildNodes(elems[0]); //Once destroyed the node ceases to exist inside the array

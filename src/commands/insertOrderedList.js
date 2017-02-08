@@ -7,12 +7,12 @@ wysihtml5.commands.insertOrderedList = {
         tempClassName =  "_wysihtml5-temp-" + new Date().getTime(),
         isEmpty,
         tempElement;
-    
+
     if (!list && !otherList && composer.commands.support(command)) {
       doc.execCommand(command, false, null);
       return;
     }
-    
+
     if (list) {
       // Unwrap list
       // <ol><li>foo</li><li>bar</li></ol>
@@ -42,7 +42,7 @@ wysihtml5.commands.insertOrderedList = {
       }
     }
   },
-  
+
   state: function(composer) {
     var selectedNode = composer.selection.getSelectedNode();
     return wysihtml5.dom.getParentElement(selectedNode, { nodeName: "OL" });

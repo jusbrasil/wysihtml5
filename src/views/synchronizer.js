@@ -3,7 +3,7 @@
  */
 (function(wysihtml5) {
   var INTERVAL = 400;
-  
+
   wysihtml5.views.Synchronizer = Base.extend(
     /** @scope wysihtml5.views.Synchronizer.prototype */ {
 
@@ -74,7 +74,12 @@
         // If the textarea is in a form make sure that after onreset and onsubmit the composer
         // has the correct state
         wysihtml5.dom.observe(form, "submit", function() {
-          that.sync(true);
+          // Force disable the sync feature. If enabled, firefox submit the unparsed content,
+          // because the synchronizer gets the old data [firefox fallback]
+          // Weird >>> This method is disabled to Chrome default
+          if (!wysihtml5.browser.detectsReturnKeydownAfterItIsDone()) {
+            that.sync(true);
+          }
         });
         wysihtml5.dom.observe(form, "reset", function() {
           setTimeout(function() { that.fromTextareaToComposer(); }, 0);
