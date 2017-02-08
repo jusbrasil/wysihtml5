@@ -318,7 +318,7 @@
           });
         }
       }
- 
+
       // Only do the auto linking by ourselves when the browser doesn't support auto linking
       // OR when he supports auto linking but we were able to turn it off (IE9+)
       if (!supportsAutoLinking || (supportsAutoLinking && supportsDisablingOfAutoLinking)) {
@@ -327,8 +327,8 @@
         this.parent.on("enable:composer", doAutoLink);
         this.parent.on("beforeload", doAutoLink);
         this.parent.on("load", doAutoLink);
- 
- 
+
+
         dom.observe(this.element, ["blur", "focus", "load", "beforeload"], function() {
           dom.autoLink(that.element);
           that.doResize();
@@ -483,9 +483,63 @@
         }
       })();
 
-      function parseElement(blockElement, keyCode){
+      function removeEmptySiblingParagraph(element, position) {
+        position = position || 'next';
+        var sibling = (position === 'next') ? element.nextElementSibling : element.previousElementSibling;
+        if (sibling && sibling.nodeName === 'P' && removeHTMLTagsFromString(sibling.innerHTML) === '') {
+          sibling.remove();
+        }
+      }
+
+      function removeHTMLTagsFromString(html, tag, replaceTo) {
+        replaceTo = replaceTo || '';
+        var exp = new RegExp('<' + (tag || '') + '[^>]*>', 'g');
+        return html.replace(exp, replaceTo);
+      }
+
+      function cleanTags(blockElement, tag, replaceTo) {
+        if (blockElement.nodeName === 'P') {
+          blockElement.innerHTML = removeHTMLTagsFromString(blockElement.innerHTML, tag, replaceTo);
+        }
+      }
+
+      function parseElement(blockElement, event){
+        var keyCode = event.keyCode;
+
+        // Jump to next element on enter (excepts shift-enter, appears ok) [firefox fallback]
+        if (wysihtml5.browser.detectsReturnKeydownAfterItIsDone() && keyCode == wysihtml5.ENTER_KEY && !event.shiftKey) {
+          blockElement = blockElement.previousElementSibling || blockElement;
+        }
+
+        // General - Parse element
         if(!that.nodeIsEmpty(blockElement) && keyCode === wysihtml5.ENTER_KEY){
           blockElement.innerHTML = dom.parse(blockElement, that.config.parserRules).innerHTML;
+        }
+
+        // Execute the firefox Fallback
+        // Firefox sometimes captures the RETURN keydown event after the next element is created
+        if (!wysihtml5.browser.hasIframeFocusIssue() && wysihtml5.browser.detectsReturnKeydownAfterItIsDone()) {
+          var nextEl = blockElement.nextElementSibling,
+            removeBR = function(el) {
+              // replace <br type="_moz"> to just <br>
+              cleanTags(el, 'br', '<br>')
+            };
+
+          // Parse <h3> element on enter
+          if (keyCode === wysihtml5.ENTER_KEY && blockElement.nodeName.match(/^H[1-6]$/)) {
+            var _h3 = that.selection.getSelectedNode().previousElementSibling;
+            _h3.innerHTML = dom.parse(_h3, that.config.parserRules).innerHTML;
+          }
+
+          // Remove <br> in paragraphs elements on backspace and enter
+          if (keyCode === wysihtml5.ENTER_KEY) {
+            removeBR(blockElement);
+            if (nextEl) {
+              removeBR(nextEl);
+            }
+          } else if (keyCode === wysihtml5.BACKSPACE_KEY && nextEl && removeHTMLTagsFromString(nextEl.innerHTML) === '') {
+            removeBR(nextEl);
+          }
         }
       }
 
@@ -506,7 +560,7 @@
               || (prevNode && that.nodeIsEmpty(prevNode) && prevNode.nodeName == "P")){
               return false;
             }
-            
+
             return true;
           }
       })();
@@ -537,8 +591,38 @@
       }
 
 
+      // Remove the br from paragraph when space key is pressed
+      // Firefox always inserts the br on space
+      if (browser.detectsReturnKeydownAfterItIsDone()) {
+        dom.observe(this.doc, "keyup", function(event) {
+          var keyCode = event.keyCode,
+            _el = that.selection.getSelectedNode();
+          if (_el.nodeType === wysihtml5.TEXT_NODE
+            && _el.textContent.slice(-2).slice(0,-1) === ' '
+            && !event.shiftKey
+            && keyCode !== wysihtml5.ENTER_KEY
+            && keyCode !== wysihtml5.BACKSPACE_KEY) {
+
+            _el.parentNode.innerHTML = removeHTMLTagsFromString(_el.parentNode.innerHTML, 'br');
+            that.repositionCaretAtEndOf(that.selection.getSelectedNode());
+          }
+        });
+      }
+
       dom.observe(this.doc, "keydown", function(event) {
         var keyCode = event.keyCode;
+
+        // [firefox fallback]
+        if (browser.detectsReturnKeydownAfterItIsDone()) {
+          var _el = that.selection.getSelectedNode()
+          // Remove the br from paragraph on type the first char
+          if (keyCode !== wysihtml5.ENTER_KEY && _el.nodeName === 'P') {
+            var cleanHTML = removeHTMLTagsFromString(_el.innerHTML, 'br');
+            if (cleanHTML === '') {
+              _el.innerHTML = cleanHTML;
+            }
+          }
+        }
 
         if(that.config.titleMode && keyCode === wysihtml5.ENTER_KEY){
           event.preventDefault();
@@ -551,6 +635,13 @@
 
         if (keyCode !== wysihtml5.ENTER_KEY && keyCode !== wysihtml5.BACKSPACE_KEY) {
           return;
+        }
+
+        var removeEmptySiblingParagraphFallback = function(el, position) {
+          setTimeout(function() {
+            // Remove empty paragraph after the created HR [firefox fallback]
+            removeEmptySiblingParagraph(el, position);
+          },0);
         }
 
         var blockElement = dom.getParentElement(that.selection.getSelectedNode(), { nodeName: USE_NATIVE_LINE_BREAK_INSIDE_TAGS }, 4);
@@ -568,13 +659,18 @@
               if(repl && !repl.nextElementSibling){
                 repl = that.insertNodes(repl,[ that.makeEmptyParagraph()]);
                 that.repositionCaretAt(repl);
+
+                // Remove empty paragraph after the created HR [firefox fallback]
+                if (browser.detectsReturnKeydownAfterItIsDone()) {
+                  removeEmptySiblingParagraphFallback(repl, 'previous');
+                }
               }
 
               return;
             } else if(blockElement.parentNode && blockElement.parentNode.nodeName == "BLOCKQUOTE") {
               var frag = that.doc.createDocumentFragment(),
               prev = blockElement.previousSibling;
-              
+
               if(prev && !that.nodeIsEmpty(prev)){
                 var prev_quote = that.doc.createElement('blockquote');
                 prev_quote.appendChild(prev.cloneNode(true));
@@ -586,7 +682,7 @@
 
                 frag.appendChild(prev_quote);
               } else {
-              
+
                 return;
               }
 
@@ -600,35 +696,97 @@
 
                 frag.appendChild(next_quote);
               } else {
-                
+
                 var blockquote = blockElement.parentNode;
                 blockquote.parentNode.insertBefore(blockElement, blockquote.nextSibling);
                 that.repositionCaretAt(blockElement);
                 return;
               }
-              
+
               if(frag.firstChild){
                 var p;
                 if(frag.childNodes.length > 1){
                   p = that.makeEmptyParagraph();
                   frag.insertBefore(p, frag.lastChild);
                 }
-                
+
                 that.replaceNodeWith(blockElement.parentNode, [frag]);
 
                 if(p){
                   that.repositionCaretAt(p);
                 }
-              } 
+              }
 
             }
-          } else  if(event.shiftKey && event.keyCode == wysihtml5.ENTER_KEY) {
+          }
+          else if(event.shiftKey && event.keyCode == wysihtml5.ENTER_KEY) {
             event.preventDefault();
             that.repositionCaretAt(that.insertNodes(blockElement, [ that.makeEmptyParagraph()]));
           }
+          // firefox fallback
+          if(browser.detectsReturnKeydownAfterItIsDone()) {
+            var TAGS_COULD_BE_REMOVE = ['HR', 'IFRAME'];
+
+            var persistRemove = function(el) {
+              setTimeout(function() {
+                el = el.previousElementSibling;
+                if (rangy.dom.arrayContains(TAGS_COULD_BE_REMOVE, el.nodeName)) {
+                  el.remove();
+                }
+              });
+            }
+
+            // Prevent delete root paragraph on backspace
+            if (event.keyCode === wysihtml5.BACKSPACE_KEY && that.isEmpty()) {
+              event.preventDefault();
+            }
+            // Force remove elements on backspace
+            else if (event.keyCode === wysihtml5.BACKSPACE_KEY) {
+              var _prev = blockElement.previousElementSibling,
+                _prevNodes = (_prev && _prev.previousElementSibling) ? _prev.previousElementSibling.childNodes: [],
+                arrayContains = rangy.dom.arrayContains;
+              // Remove HL from sibling
+              if (blockElement
+                && _prev
+                && removeHTMLTagsFromString(blockElement.innerHTML) === ''
+                && arrayContains(TAGS_COULD_BE_REMOVE, _prev.nodeName)) {
+
+                if (_prev.previousElementSibling
+                  && _prevNodes.length
+                  && _prevNodes[0].nodeName === 'IFRAME') {
+                  _prev.outerHTML = that.makeEmptyParagraph().outerHTML;
+                } else {
+                  _prev.remove();
+                }
+              }
+              // Remove HL from list
+              if (arrayContains(LIST_TAGS, blockElement.parentNode.nodeName)
+                && blockElement.parentNode.childNodes.length === 1
+                && removeHTMLTagsFromString(blockElement.innerHTML) === ''
+                && arrayContains(TAGS_COULD_BE_REMOVE, blockElement.parentNode.previousElementSibling.nodeName)) {
+                blockElement.parentNode.previousElementSibling.remove();
+              }
+              // Remove iframe
+              if (blockElement
+                && _prev
+                && _prev.childNodes.length
+                && removeHTMLTagsFromString(blockElement.innerHTML) === ''
+                && arrayContains(TAGS_COULD_BE_REMOVE, _prev.childNodes[0].nodeName)) {
+                persistRemove(_prev);
+                _prev.remove();
+              }
+              // Remove iframe inside the your paragraph
+              if (blockElement
+                && blockElement.nodeName === 'P'
+                && blockElement.childNodes.length
+                && blockElement.childNodes[0].nodeName === 'IFRAME') {
+                blockElement.childNodes[0].remove();
+              }
+            }
+          }
 
           if(browser.insertsLineBreaksOnReturn() && !browser.detectsReturnKeydownAfterItIsDone()){//IE case
-            parseElement(blockElement, keyCode);
+            parseElement(blockElement, event);
           }
 
           setTimeout(function() {
@@ -648,15 +806,33 @@
               }
             }
 
-             if(!browser.hasIframeFocusIssue() && !browser.detectsReturnKeydownAfterItIsDone()){//General case
-                parseElement(blockElement, keyCode);
-             }
+            if(!browser.hasIframeFocusIssue()){//General case
+              parseElement(blockElement, event);
+            }
 
             if (keyCode === wysihtml5.ENTER_KEY && blockElement.nodeName.match(/^H[1-6]$/)) {
               adjust(selectedNode);
             }
           }, 0);
           return;
+        } else {
+          // [firefox fallback]
+          if (browser.detectsReturnKeydownAfterItIsDone() && keyCode !== wysihtml5.BACKSPACE_KEY) {
+            var _body = that.selection.getSelectedNode();
+            _body.innerHTML = wysihtml5.dom.parse(_body, that.config.parserRules).innerHTML;
+            // create a paragraph on breaked cursor
+            if (keyCode === wysihtml5.ENTER_KEY) {
+              that.repositionCaretAt(_body.appendChild(that.makeEmptyParagraph()));
+            }
+            // reposition the cursor to last paragraph on breaked cursor
+            else {
+              var children = _body.childNodes,
+                firstP = that._isSiblingOfA(children[children.length - 1], 'P');
+              if (firstP) {
+                that.repositionCaretAtEndOf(firstP);
+              }
+            }
+          }
         }
 
         if (that.config.useLineBreaks && keyCode === wysihtml5.ENTER_KEY && !wysihtml5.browser.insertsLineBreaksOnReturn()) {

@@ -11,19 +11,19 @@ wysihtml5.browser = (function() {
       isChrome    = userAgent.indexOf("Chrome/")      !== -1,
       isOpera     = userAgent.indexOf("Opera/")       !== -1,
       isFirefox   = userAgent.indexOf("Firefox")      !== -1;
-  
+
   function iosVersion(userAgent) {
     return +((/ipad|iphone|ipod/.test(userAgent) && userAgent.match(/ os (\d+).+? like mac os x/)) || [, 0])[1];
   }
-  
+
   function androidVersion(userAgent) {
     return +(userAgent.match(/android (\d+)/) || [, 0])[1];
   }
-  
+
   return {
     // Static variable needed, publicly accessible, to be able override it in unit tests
     USER_AGENT: userAgent,
-    
+
     /**
      * Exclude browsers that are not capable of displaying and handling
      * contentEditable as desired:
@@ -47,19 +47,19 @@ wysihtml5.browser = (function() {
         && hasQuerySelectorSupport
         && !isIncompatibleMobileBrowser;
     },
-    
+
     isTouchDevice: function() {
       return this.supportsEvent("touchmove");
     },
-    
+
     isIos: function() {
       return (/ipad|iphone|ipod/i).test(this.USER_AGENT);
     },
-    
+
     isAndroid: function() {
       return this.USER_AGENT.indexOf("Android") !== -1;
     },
-    
+
     /**
      * Whether the browser supports sandboxed iframes
      * Currently only IE 6+ offers such feature <iframe security="restricted">
@@ -98,7 +98,7 @@ wysihtml5.browser = (function() {
     hasCurrentStyleProperty: function() {
       return "currentStyle" in testElement;
     },
-    
+
     /**
      * Firefox on OSX navigates through history when hitting CMD + Arrow right/left
      */
@@ -130,7 +130,7 @@ wysihtml5.browser = (function() {
     supportsEventsInIframeCorrectly: function() {
       return !isOpera;
     },
-    
+
     /**
      * Everything below IE9 doesn't know how to treat HTML5 tags
      *
@@ -169,7 +169,7 @@ wysihtml5.browser = (function() {
         "insertUnorderedList":  isIE || isWebKit,
         "insertOrderedList":    isIE || isWebKit
       };
-      
+
       // Firefox throws errors for queryCommandSupported, so we have to build up our own object of supported commands
       var supported = {
         "insertHTML": isGecko
@@ -278,14 +278,14 @@ wysihtml5.browser = (function() {
     supportsSelectionModify: function() {
       return "getSelection" in window && "modify" in window.getSelection();
     },
-    
+
     /**
      * Opera needs a white space after a <br> in order to position the caret correctly
      */
     needsSpaceAfterLineBreak: function() {
       return isOpera;
     },
-    
+
     /**
      * Whether the browser supports the speech api on the given element
      * See http://mikepultz.com/2011/03/accessing-google-speech-api-chrome-11/
@@ -300,7 +300,7 @@ wysihtml5.browser = (function() {
       var chromeVersion = userAgent.match(/Chrome\/(\d+)/) || [, 0];
       return chromeVersion[1] >= 11 && ("onwebkitspeechchange" in input || "speech" in input);
     },
-    
+
     /**
      * IE9 crashes when setting a getter via Object.defineProperty on XMLHttpRequest or XDomainRequest
      * See https://connect.microsoft.com/ie/feedback/details/650112
@@ -309,25 +309,25 @@ wysihtml5.browser = (function() {
     crashesWhenDefineProperty: function(property) {
       return isIE && (property === "XMLHttpRequest" || property === "XDomainRequest");
     },
-    
+
     /**
      * IE is the only browser who fires the "focus" event not immediately when .focus() is called on an element
      */
     doesAsyncFocus: function() {
       return isIE;
     },
-    
+
     /**
      * In IE it's impssible for the user and for the selection library to set the caret after an <img> when it's the lastChild in the document
      */
     hasProblemsSettingCaretAfterImg: function() {
       return isIE;
     },
-    
+
     hasUndoInContextMenu: function() {
       return isGecko || isChrome || isOpera;
     },
-    
+
     /**
      * Opera sometimes doesn't insert the node at the right position when range.insertNode(someNode)
      * is used (regardless if rangy or native)
@@ -337,17 +337,17 @@ wysihtml5.browser = (function() {
     hasInsertNodeIssue: function() {
       return isOpera;
     },
-    
+
     /**
      * IE 8+9 don't fire the focus event of the <body> when the iframe gets focused (even though the caret gets set into the <body>)
      */
     hasIframeFocusIssue: function() {
       return isIE;
     },
-    
+
     /**
      * Chrome + Safari create invalid nested markup after paste
-     * 
+     *
      *  <p>
      *    foo
      *    <p>bar</p> <!-- BOO! -->

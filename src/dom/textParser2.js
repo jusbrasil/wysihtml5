@@ -70,22 +70,22 @@ wysihtml5.dom.textParser.extractText = function(node, preserve){
 
 /**
  * Checks if a given text should or shouldn't be parsed. If it shouldn't the method stores the original text in a var a nd
- * 
+ *
  * @param  string text
  * @param  regexp rule
- * @return string     
+ * @return string
  */
 wysihtml5.dom.textParser.preserveMarkup = function(text, rule) {
-  
+
   return rule !== undefined ? text.replace(rule, this.PRESERVE_MARKUP) : text;
 };
 
 /**
- * Extracts text that shold preserved from the 
- * 
- * @param node node 
+ * Extracts text that shold preserved from the
+ *
+ * @param node node
  * @param regexp preserve
- * @return array 
+ * @return array
  */
 wysihtml5.dom.textParser.extractPreserved = function(node, preserve) {
   var that = this;
@@ -128,7 +128,7 @@ wysihtml5.dom.textParser.extractNodeMarkup = function(node){
 };
 
 /**
- * 
+ *
  *
  * @param node
  * @returns {string}
@@ -154,7 +154,7 @@ wysihtml5.dom.textParser.getNodeMarkupGuts = function(node){
 
 /**
  * Replace text with the preserved strings
- * 
+ *
  * @param  array preserved_set  [description]
  * @param  string text [description]
  * @return string
@@ -211,7 +211,7 @@ wysihtml5.dom.textParser.parse = function(node, rules, preserve){
     }
 
     var tokenSet = that.applyRules(//Applying the rules to the text
-          wholeText.replace(that.TEXT_PLACEMENT_MARKUP_REGEX,''), 
+          wholeText.replace(that.TEXT_PLACEMENT_MARKUP_REGEX,''),
           rules
         ).split(that.TEXT_PLACEMENT_MARKUP);
 

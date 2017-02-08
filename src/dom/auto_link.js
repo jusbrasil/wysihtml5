@@ -27,7 +27,7 @@
       TRAILING_CHAR_REG_EXP = /([^\w\/\-](,?))$/i,
       MAX_DISPLAY_LENGTH    = 100,
       BRACKETS              = { ")": "(", "]": "[", "}": "{" };
-  
+
   function autoLink(element) {
     if (_hasParentThatShouldBeIgnored(element)) {
       return element;
@@ -39,7 +39,7 @@
 
     return _parseNode(element);
   }
-  
+
   /**
    * This is basically a rebuild of
    * the rails auto_link_urls text helper
@@ -129,7 +129,7 @@
 
     return '<iframe src="'+_getVideoEmbedURL(vidsrc, vidid)+'" width="496px" height="278px">'+_getVideoEmbedURL(vidsrc, vidid)+'</iframe>';
   }
-  
+
   /**
    * Creates or (if already cached) returns a temp element
    * for the given document object
@@ -141,7 +141,7 @@
     }
     return tempElement;
   }
-  
+
   /**
    * Replaces the original text nodes with the newly auto-linked dom tree
    */
@@ -149,19 +149,19 @@
     var parentNode  = textNode.parentNode,
         nodeValue   = wysihtml5.lang.string(textNode.data).escapeHTML(),
         tempElement = _getTempElement(parentNode.ownerDocument);
-    
+
     // We need to insert an empty/temporary <span /> to fix IE quirks
     // Elsewise IE would strip white space in the beginning
     tempElement.innerHTML = "<span></span>" + _convertUrlsToLinks(nodeValue);
     tempElement.removeChild(tempElement.firstChild);
-    
+
     while (tempElement.firstChild) {
       // inserts tempElement.firstChild before textNode
       parentNode.insertBefore(tempElement.firstChild, textNode);
     }
     parentNode.removeChild(textNode);
   }
-  
+
   function _hasParentThatShouldBeIgnored(node) {
     var nodeName;
     while (node.parentNode) {
@@ -175,7 +175,7 @@
     }
     return false;
   }
-  
+
   function _parseNode(element) {
     if (IGNORE_URLS_IN.contains(element.nodeName)) {
       if(element.href && _isVideoUrl(element.href)) {
@@ -184,28 +184,28 @@
         wysihtml5.dom.renameElement(element, 'span');
         element.innerText = element.href;
       } else {
-        return;  
+        return;
       }
     }
-    
+
     if (element.nodeType === wysihtml5.TEXT_NODE && element.data.match(URL_REG_EXP)) {
       _wrapMatchesInNode(element);
       return;
     }
-    
+
     var childNodes        = wysihtml5.lang.array(element.childNodes).get(),
         childNodesLength  = childNodes.length,
         i                 = 0;
-    
+
     for (; i<childNodesLength; i++) {
       _parseNode(childNodes[i]);
     }
-    
+
     return element;
   }
-  
+
   wysihtml5.dom.autoLink = autoLink;
-  
+
   // Reveal url reg exp to the outside
   wysihtml5.dom.autoLink.URL_REG_EXP = URL_REG_EXP;
 })(wysihtml5);

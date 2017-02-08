@@ -10,7 +10,7 @@
  */
 var wysihtml5 = {
   version: "@VERSION",
-  
+
   // namespaces
   commands:   {},
   dom:        {},
@@ -19,15 +19,15 @@ var wysihtml5 = {
   lang:       {},
   selection:  {},
   views:      {},
-  
+
   INVISIBLE_SPACE: "\uFEFF",
-  
+
   EMPTY_FUNCTION: function() {},
-  
+
   ELEMENT_NODE: 1,
   TEXT_NODE:    3,
   DOC_FRAGMENT_NODE: 11,
-  
+
   BACKSPACE_KEY:  8,
   ENTER_KEY:      13,
   ESCAPE_KEY:     27,
