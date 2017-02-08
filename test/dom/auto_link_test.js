@@ -118,25 +118,25 @@ test('Auto video iframe creation', function(){
   //youtube videos
   this.equal(
     this.autoLink("http://youtu.be/rG6aIVGquOg?t=11m40s"),
-    "<iframe src=\"http://www.youtube.com/embed/rG6aIVGquOg\" width=\""+w+"\" height=\""+h+"\">http://www.youtube.com/embed/rG6aIVGquOg</iframe>",
+    "<iframe src=\"https://www.youtube.com/embed/rG6aIVGquOg\" width=\""+w+"\" height=\""+h+"\">https://www.youtube.com/embed/rG6aIVGquOg</iframe>",
     "Check if youtube video iframe is correctly created case 1"
   );
 
   this.equal(
     this.autoLink("http://www.youtube.com/watch?v=rG6aIVGquOg?t=11m40s"),
-    "<iframe src=\"http://www.youtube.com/embed/rG6aIVGquOg\" width=\""+w+"\" height=\""+h+"\">http://www.youtube.com/embed/rG6aIVGquOg</iframe>",
+    "<iframe src=\"https://www.youtube.com/embed/rG6aIVGquOg\" width=\""+w+"\" height=\""+h+"\">https://www.youtube.com/embed/rG6aIVGquOg</iframe>",
     "Check if youtube video iframe is correctly created case 2"
   );
 
   this.equal(
-    this.autoLink("http://www.youtube.com/embed/rG6aIVGquOg"),
-    "<iframe src=\"http://www.youtube.com/embed/rG6aIVGquOg\" width=\""+w+"\" height=\""+h+"\">http://www.youtube.com/embed/rG6aIVGquOg</iframe>",
+    this.autoLink("https://www.youtube.com/embed/rG6aIVGquOg"),
+    "<iframe src=\"https://www.youtube.com/embed/rG6aIVGquOg\" width=\""+w+"\" height=\""+h+"\">https://www.youtube.com/embed/rG6aIVGquOg</iframe>",
     "Check if youtube video iframe is correctly created case 3"
   );
 
   this.equal(
     this.autoLink("http://youtu.be/rG6aIVGquOg?t=11m40s"),
-    "<iframe src=\"http://www.youtube.com/embed/rG6aIVGquOg\" width=\""+w+"\" height=\""+h+"\">http://www.youtube.com/embed/rG6aIVGquOg</iframe>",
+    "<iframe src=\"https://www.youtube.com/embed/rG6aIVGquOg\" width=\""+w+"\" height=\""+h+"\">https://www.youtube.com/embed/rG6aIVGquOg</iframe>",
     "Check if youtube video iframe is correctly created case 4"
   );
 
@@ -144,19 +144,19 @@ test('Auto video iframe creation', function(){
   //daily motion videos
   this.equal(
     this.autoLink("http://www.dailymotion.com/video/xzz28x_roubo-milionario-em-cannes_news"),
-    "<iframe src=\"http://www.dailymotion.com/embed/video/xzz28x\" width=\""+w+"\" height=\""+h+"\">http://www.dailymotion.com/embed/video/xzz28x</iframe>",
+    "<iframe src=\"https://www.dailymotion.com/embed/video/xzz28x\" width=\""+w+"\" height=\""+h+"\">https://www.dailymotion.com/embed/video/xzz28x</iframe>",
     "Check if Daily Motion video iframe is correctly created case 1"
   );
 
   this.equal(
     this.autoLink("http://dai.ly/xzz28x"),
-    "<iframe src=\"http://www.dailymotion.com/embed/video/xzz28x\" width=\""+w+"\" height=\""+h+"\">http://www.dailymotion.com/embed/video/xzz28x</iframe>",
+    "<iframe src=\"https://www.dailymotion.com/embed/video/xzz28x\" width=\""+w+"\" height=\""+h+"\">https://www.dailymotion.com/embed/video/xzz28x</iframe>",
     "Check if Daily Motion video iframe is correctly created case 2"
   );
 
   this.equal(
-    this.autoLink("http://www.dailymotion.com/embed/video/xzz28x"),
-    "<iframe src=\"http://www.dailymotion.com/embed/video/xzz28x\" width=\""+w+"\" height=\""+h+"\">http://www.dailymotion.com/embed/video/xzz28x</iframe>",
+    this.autoLink("https://www.dailymotion.com/embed/video/xzz28x"),
+    "<iframe src=\"https://www.dailymotion.com/embed/video/xzz28x\" width=\""+w+"\" height=\""+h+"\">https://www.dailymotion.com/embed/video/xzz28x</iframe>",
     "Check if Daily Motion video iframe is correctly created case 3"
   );
 
