@@ -6,7 +6,7 @@
  */
 (function(wysihtml5) {
   var dom = wysihtml5.dom;
-  
+
   function _getCumulativeOffsetTop(element) {
     var top = 0;
     if (element.parentNode) {
@@ -17,18 +17,18 @@
     }
     return top;
   }
-  
+
   wysihtml5.Selection = Base.extend(
     /** @scope wysihtml5.Selection.prototype */ {
     constructor: function(editor) {
       // Make sure that our external range library is initialized
       window.rangy.init();
-      
+
       this.editor   = editor;
       this.composer = editor.composer;
       this.doc      = this.composer.doc;
     },
-    
+
     /**
      * Get the current selection as a bookmark to be able to later restore it
      *
@@ -157,27 +157,27 @@
           nextSibling,
           node,
           newRange;
-      
+
       // Nothing selected, execute and say goodbye
       if (!range) {
         method(body, body);
         return;
       }
-      
+
       if (wysihtml5.browser.hasInsertNodeIssue()) {
         this.doc.execCommand("insertHTML", false, placeholderHtml);
       } else {
         node = range.createContextualFragment(placeholderHtml);
         range.insertNode(node);
       }
-      
+
       // Make sure that a potential error doesn't cause our placeholder element to be left as a placeholder
       try {
         method(range.startContainer, range.endContainer);
       } catch(e) {
         setTimeout(function() { throw e; }, 0);
       }
-      
+
       caretPlaceholder = this.doc.querySelector("." + className);
       if (caretPlaceholder) {
         newRange = rangy.createRange(this.doc);
@@ -189,6 +189,10 @@
           newRange.setStartBefore(newCaretPlaceholder);
           newRange.setEndBefore(newCaretPlaceholder);
         } else {
+          var caretPlaceholderContent = caretPlaceholder.textContent;
+          if (caretPlaceholderContent !== '' && caretPlaceholderContent !== wysihtml5.INVISIBLE_SPACE) {
+            caretPlaceholder.outerHTML = dom.parse(caretPlaceholder, this.composer.config.parserRules).innerHTML;
+          }
           newRange.selectNode(caretPlaceholder);
           newRange.deleteContents();
         }
@@ -251,13 +255,13 @@
       try { newRange.setEnd(rangeBackup.endContainer, rangeBackup.endOffset); } catch(e2) {}
       try { this.setSelection(newRange); } catch(e3) {}
     },
-    
+
     set: function(node, offset) {
       var newRange = rangy.createRange(this.doc);
       newRange.setStart(node, offset || 0);
       this.setSelection(newRange);
     },
-    
+
     /**
      * Insert html at the caret position and move the cursor after the inserted html
      *
@@ -421,7 +425,7 @@
         return [];
       }
     },
-    
+
     getRange: function() {
       var selection = this.getSelection();
       return selection && selection.rangeCount && selection.getRangeAt(0);
@@ -437,5 +441,5 @@
       return selection.setSingleRange(range);
     }
   });
-  
+
 })(wysihtml5);

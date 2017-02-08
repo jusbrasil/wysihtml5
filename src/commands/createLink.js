@@ -2,7 +2,7 @@
   var undef,
       NODE_NAME = "A",
       dom       = wysihtml5.dom;
-  
+
   function _removeFormat(composer, anchors) {
     var length  = anchors.length,
         i       = 0,
@@ -65,7 +65,7 @@
     }
     composer.selection.setAfter(elementToSetCaretAfter);
   }
-  
+
   wysihtml5.commands.createLink = {
     /**
      * TODO: Use HTMLApplier or formatInline here
@@ -73,7 +73,7 @@
      * Turns selection into a link
      * If selection is already a link, it removes the link and wraps it with a <code> element
      * The <code> element is needed to avoid auto linking
-     * 
+     *
      * @example
      *    // either ...
      *    wysihtml5.commands.createLink.exec(composer, "createLink", "http://www.google.de");

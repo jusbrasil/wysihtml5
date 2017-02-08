@@ -124,8 +124,8 @@
     /**
      * Checks if a given node is child of some node of a kind
      * @param  Element  child           The child node
-     * @param  string  expectedNodeName The parent node name 
-     * @return {Boolean}                 
+     * @param  string  expectedNodeName The parent node name
+     * @return {Boolean}
      */
     this._isChildOfA = function(child, expectedNodeName){
       var parent = child.parentNode;
@@ -140,6 +140,19 @@
       return false;
     };
 
+    this._isSiblingOfA = function(root, expectedNodeName) {
+      if (!root) return;
+      var sib = root.previousElementSibling;
+      while(sib) {
+        if (sib.nodeName === expectedNodeName) {
+          return sib;
+        } else {
+          sib = sib.previousElementSibling;
+        }
+      }
+      return false;
+    }
+
     dom.observe(element, "keypress", function(event){
       var selNode = that.selection.getSelectedNode(true);
       var keyCode = event.keyCode;
@@ -147,7 +160,7 @@
         if(that.selection.getText() === ""){
           event.preventDefault();
         }
-      } else if(selNode && selNode.nodeName === "P" 
+      } else if(selNode && selNode.nodeName === "P"
           && (keyCode !== wysihtml5.BACKSPACE_KEY && keyCode !== wysihtml5.DELETE_KEY && keyCode !== wysihtml5.ENTER_KEY)
           && selNode.firstChild && selNode.firstChild.nodeName === "IMG") {
         event.preventDefault();
@@ -232,23 +245,45 @@
       that.parent.fire("unset_placeholder");
     });
 
+
+
     if(typeof that.config.filterOnPaste === "function"){
       that.filterOnPaste = function(e){
         if(e.clipboardData){
           e.preventDefault();
           var txt = e.clipboardData.getData('text/html') || e.clipboardData.getData('text');
           txt = that.config.filterOnPaste(txt);
-         
+
+          // Firefox avoids pasting clipboardData in text/html type
+          // This method replace break line by paragraph
+          // [firefox fallback]
+          if (wysihtml5.browser.detectsReturnKeydownAfterItIsDone() && !e.clipboardData.types.contains('text/html')) {
+            txt = txt.replace(/\n+|\r+/g, '<br><br>');
+          }
+
+          // Break sequential breaklines in paragraphs
+          // and sanitize them
+          // (merge two or more <br> as one)
+          //
+          // Example:
+          // In: <p>Text<br><br>Text2</p>
+          // Out: <p>Text></p><p>Text2</p>
+          txt = txt
+            .replace(/p>(&nbsp;| )/g, 'p>')
+            .replace(/(&nbsp;| )<p/g, '<p')
+            .replace(/[&nbsp;$| $]*(<br[^>]*>)(<br[^>]*>)+/g, '</p><p>');
+
           that.commands.exec('insertHTML', txt);
         }
       };
 
     } else {
       that.filterOnPaste = function(){};
-    }  
+    }
 
     dom.observe(element, pasteEvents, function(e) {
       that.filterOnPaste(e);
+
       setTimeout(function() {
         that.parent.fire("paste").fire("paste:composer");
       }, 0);
@@ -343,7 +378,7 @@
           || (keyCode == wysihtml5.DELETE_KEY && is_image_node(target) && that.selection.getSelection().anchorOffset != 0) //Delete with caret in a image paragraph
           || (keyCode == wysihtml5.BACKSPACE_KEY && target.previousSibling &&  is_image_node(target.previousSibling) && that.selection.getSelection().anchorOffset == 0)//Backspace with a image paragraph as previous sibling
           || (keyCode == wysihtml5.DELETE_KEY && target.nextSibling && is_image_node(target.nextSibling) && that.selection.getSelection().anchorOffset == target.innerText.length)) {//Delete with a image paragraph as next sibling
-         
+
           event.preventDefault();
         }
       }
@@ -394,7 +429,7 @@
     var repositionCaretAfter = function(quote, prev, next){
         that.parent.composer.repositionCaretAt(next[0]);
     };
-    
+
     // --------- Make sure that when pressing backspace/delete on a blockquote, it is unmade ---------
     dom.observe(element, "keydown", function(event) {
       var target  = that.selection.getSelectedNode(true),
@@ -407,7 +442,7 @@
         if(parent) { //and it's inside a blockquote
           var prev = parent.previousSibling;
           if(prev && prev.nodeName == "P" && that.parent.composer.nodeIsEmpty(prev)) {
-            joinBlockquotes(event, prev, repositionCaretBefore);            
+            joinBlockquotes(event, prev, repositionCaretBefore);
           }
 
         } else if(that.parent.composer.nodeIsEmpty(target)) {
@@ -425,7 +460,7 @@
 
         } else if(that.parent.composer.nodeIsEmpty(target)) {
           //joining blockquotes when deleting empty p with delete
-          joinBlockquotes(event, target, repositionCaretAfter);  
+          joinBlockquotes(event, target, repositionCaretAfter);
         }
       }
     });

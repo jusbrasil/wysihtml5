@@ -17,7 +17,7 @@ wysihtml5.lang.array = function(arr) {
         return false;
       }
     },
-    
+
     /**
      * Substract one array from another
      *
@@ -37,10 +37,10 @@ wysihtml5.lang.array = function(arr) {
       }
       return newArr;
     },
-    
+
     /**
      * Return a clean native array
-     * 
+     *
      * Following will convert a Live NodeList to a proper Array
      * @example
      *    var childNodes = wysihtml5.lang.array(document.body.childNodes).get();
