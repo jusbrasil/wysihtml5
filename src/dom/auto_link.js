@@ -115,9 +115,9 @@
   //Returns the URL for embed video given a video source and the video id
   function _getVideoEmbedURL(vidsrc, vidid){
     var provs = {
-      'youtube': 'http://www.youtube.com/embed/{{VIDID}}',
-      'vimeo': 'http://player.vimeo.com/video/{{VIDID}}?title=0&amp;byline=0&amp;portrait=0',
-      'daily': 'http://www.dailymotion.com/embed/video/{{VIDID}}'
+      'youtube': 'https://www.youtube.com/embed/{{VIDID}}',
+      'vimeo': 'https://player.vimeo.com/video/{{VIDID}}?title=0&amp;byline=0&amp;portrait=0',
+      'daily': 'https://www.dailymotion.com/embed/video/{{VIDID}}'
     }
 
     return provs[vidsrc].replace('{{VIDID}}', vidid);
