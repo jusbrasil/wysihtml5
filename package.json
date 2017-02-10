@@ -1,7 +1,8 @@
 {
   "name": "wysihtml5",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "repository": "jusbrasil/wysihtml5",
+  "main": "./dist/wysihtml5.js",
   "license": "MIT",
   "devDependencies": {
     "grunt"                 : "~0.4.2",
