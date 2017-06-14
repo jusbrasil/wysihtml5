@@ -14,7 +14,7 @@
 }(this, function () {
 
 /**
- * @license wysihtml5 v0.6.0
+ * @license wysihtml5 v0.6.1
  * https://github.com/xing/wysihtml5
  *
  * Author: Christopher Blum (https://github.com/tiff)
@@ -24,7 +24,7 @@
  *
  */
 var wysihtml5 = {
-  version: "0.6.0",
+  version: "0.6.1",
 
   // namespaces
   commands:   {},
