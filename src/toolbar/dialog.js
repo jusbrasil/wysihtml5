@@ -57,8 +57,6 @@
               that.fire("save", attributes);
             }
             that.hide();
-            event.preventDefault();
-            event.stopPropagation();
           };
 
       dom.observe(that.link, "click", function() {
@@ -83,8 +81,6 @@
       dom.delegate(this.container, "[data-wysihtml5-dialog-action=cancel]", "click", function(event) {
         that.fire("cancel");
         that.hide();
-        event.preventDefault();
-        event.stopPropagation();
       });
 
       var formElements  = this.container.querySelectorAll(SELECTOR_FORM_ELEMENTS),
