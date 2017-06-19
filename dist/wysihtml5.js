@@ -14,7 +14,7 @@
 }(this, function () {
 
 /**
- * @license wysihtml5 v0.6.1
+ * @license wysihtml5 v0.6.2
  * https://github.com/xing/wysihtml5
  *
  * Author: Christopher Blum (https://github.com/tiff)
@@ -24,7 +24,7 @@
  *
  */
 var wysihtml5 = {
-  version: "0.6.1",
+  version: "0.6.2",
 
   // namespaces
   commands:   {},
@@ -10576,6 +10576,10 @@ wysihtml5.views.Textarea = wysihtml5.views.View.extend(
           caretBookmark = that.composer.selection.getBookmark();
 
           that.editor.fire("show:dialog", { command: command, dialogContainer: dialogElement, commandLink: link });
+        });
+
+        dialog.on("edit", function(attributes) {
+          that.editor.fire("edit:dialog", { command: command, dialogContainer: dialogElement, commandLink: link });
         });
 
         dialog.on("save", function(attributes) {
